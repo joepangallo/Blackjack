@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
@@ -19,16 +18,13 @@ export default function App() {
     return unsub;
   }, []);
 
-  // Show loading while Firebase checks login
   if (checking) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
+      <div style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center", backgroundColor: "#0b6623" }}>
+        <span style={{ color: "white", fontSize: 18 }}>Loading...</span>
+      </div>
     );
   }
 
-  // 🔑 THIS WAS MISSING
-  // If logged in → game, else → login
   return user ? <GameScreen /> : <LoginScreen />;
 }

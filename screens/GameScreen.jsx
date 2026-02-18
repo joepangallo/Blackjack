@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, Pressable } from "react-native";
-
-import { gameStyles } from "../styles/GameStyles";
 import { makeNewDeck, shuffleDeck, deal } from "../components/deck";
 import { cardImages } from "../components/cardImages";
-
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
@@ -15,13 +11,12 @@ export default function GameScreen() {
   const [message, setMessage] = useState("");
   const [gameOver, setGameOver] = useState(false);
 
-  // Calculate blackjack score (A = 11 or 1)
   const getScore = (hand) => {
     let total = 0;
     let aces = 0;
 
     for (const card of hand) {
-      const value = card.slice(0, -1); // "A", "10", "K"...
+      const value = card.slice(0, -1);
       if (value === "A") {
         total += 11;
         aces += 1;
@@ -32,7 +27,6 @@ export default function GameScreen() {
       }
     }
 
-    // Convert Ace from 11 to 1 if busting
     while (total > 21 && aces > 0) {
       total -= 10;
       aces -= 1;
@@ -110,68 +104,136 @@ export default function GameScreen() {
   const safeImage = (code) => cardImages[code] ?? cardImages.BACK;
 
   return (
-    <View style={gameStyles.container}>
-      <Text style={gameStyles.title}>Blackjack</Text>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Blackjack</h1>
 
       {/* Dealer */}
-      <Text style={gameStyles.sectionLabel}>Dealer</Text>
-      <Text style={gameStyles.scoreText}>
+      <span style={styles.sectionLabel}>Dealer</span>
+      <span style={styles.scoreText}>
         Score: {dealer.length ? getScore(dealer) : "-"}
-      </Text>
+      </span>
 
-      <View style={gameStyles.handRow}>
+      <div style={styles.handRow}>
         {dealer.map((c, idx) => (
-          <Image
+          <img
             key={`${c}-${idx}`}
-            source={safeImage(c)}
-            style={gameStyles.cardImage}
+            src={safeImage(c)}
+            alt={c}
+            style={styles.cardImage}
           />
         ))}
-      </View>
+      </div>
 
       {/* Player */}
-      <Text style={[gameStyles.sectionLabel, { marginTop: 16 }]}>Player</Text>
-      <Text style={gameStyles.scoreText}>
+      <span style={{ ...styles.sectionLabel, marginTop: 16 }}>Player</span>
+      <span style={styles.scoreText}>
         Score: {player.length ? getScore(player) : "-"}
-      </Text>
+      </span>
 
-      <View style={gameStyles.handRow}>
+      <div style={styles.handRow}>
         {player.map((c, idx) => (
-          <Image
+          <img
             key={`${c}-${idx}`}
-            source={safeImage(c)}
-            style={gameStyles.cardImage}
+            src={safeImage(c)}
+            alt={c}
+            style={styles.cardImage}
           />
         ))}
-      </View>
+      </div>
 
       {/* Message */}
-      {message ? <Text style={gameStyles.message}>{message}</Text> : null}
+      {message ? <span style={styles.message}>{message}</span> : null}
 
       {/* Buttons */}
-      <Pressable
-        style={[gameStyles.button, gameOver && gameStyles.buttonDisabled]}
-        onPress={hitPlayer}
+      <button
+        style={{ ...styles.button, ...(gameOver ? styles.buttonDisabled : {}) }}
+        onClick={hitPlayer}
         disabled={gameOver}
       >
-        <Text style={gameStyles.buttonText}>Hit</Text>
-      </Pressable>
+        Hit
+      </button>
 
-      <Pressable
-        style={[gameStyles.button, gameOver && gameStyles.buttonDisabled]}
-        onPress={stand}
+      <button
+        style={{ ...styles.button, ...(gameOver ? styles.buttonDisabled : {}) }}
+        onClick={stand}
         disabled={gameOver}
       >
-        <Text style={gameStyles.buttonText}>Stand</Text>
-      </Pressable>
+        Stand
+      </button>
 
-      <Pressable style={gameStyles.button} onPress={startGame}>
-        <Text style={gameStyles.buttonText}>New Game</Text>
-      </Pressable>
+      <button style={styles.button} onClick={startGame}>
+        New Game
+      </button>
 
-      <Pressable style={gameStyles.button} onPress={() => signOut(auth)}>
-        <Text style={gameStyles.buttonText}>Log Out</Text>
-      </Pressable>
-    </View>
+      <button style={styles.button} onClick={() => signOut(auth)}>
+        Log Out
+      </button>
+    </div>
   );
 }
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    backgroundColor: "#0b6623",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 20,
+  },
+  sectionLabel: {
+    color: "#ccc",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  scoreText: {
+    color: "white",
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  cardImage: {
+    width: 100,
+    height: 150,
+    objectFit: "contain",
+    margin: 6,
+    backgroundColor: "white",
+    borderRadius: 6,
+    border: "1px solid #111",
+  },
+  handRow: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  button: {
+    backgroundColor: "#222",
+    color: "white",
+    padding: "12px 24px",
+    borderRadius: 8,
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+    border: "none",
+    cursor: "pointer",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
+  },
+  message: {
+    color: "#FFD700",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+};
